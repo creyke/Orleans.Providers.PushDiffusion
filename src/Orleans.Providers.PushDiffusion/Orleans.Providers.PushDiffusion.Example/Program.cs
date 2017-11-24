@@ -21,26 +21,10 @@ namespace Orleans.Providers.PushDiffusion.Example
 
             var client = await CreateGrainClient();
 
-            await Example(client);
+            await new Example().Run(client);
 
             Console.ReadLine();
             await silo.StopAsync();
-        }
-
-        static async Task Example(IClusterClient client)
-        {
-            var random = new Random();
-
-            while (true)
-            {
-                for (int meterId = 0; meterId < 10; meterId++)
-                {
-                    var value = random.Next(0, 100);
-                    await client.GetGrain<IMeterGrain>(meterId).SetValue(value);
-                }
-
-                await Task.Delay(100);
-            }
         }
 
         // https://medium.com/@scott.rangeley/from-the-ground-up-basics-of-porting-to-orleans-2-0-beta-af6824990d77

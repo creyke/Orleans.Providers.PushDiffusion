@@ -175,6 +175,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Example.cs" />
     <Compile Include="Grains\MeterGrain.cs" />
     <Compile Include="Interfaces\IMeterGrain.cs" />
     <Compile Include="Program.cs" />
