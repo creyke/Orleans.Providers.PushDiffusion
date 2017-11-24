@@ -14,14 +14,18 @@ namespace Orleans.Providers.PushDiffusion.Example
 {
     class Program
     {
+        private static Example example;
+
         static async Task Main(string[] args)
         {
+            example = new Example();
+
             var silo = BuildSilo();
             await silo.StartAsync();
 
             var client = await CreateGrainClient();
 
-            await new Example().Run(client);
+            await example.Run(client);
 
             Console.ReadLine();
             await silo.StopAsync();
@@ -32,15 +36,7 @@ namespace Orleans.Providers.PushDiffusion.Example
         {
             var localConfiguration = ClusterConfiguration.LocalhostPrimarySilo();
 
-            localConfiguration.Globals.RegisterStorageProvider<ExamplePushDiffusionStorageProvider>(
-                "Default",
-                new Dictionary<string, string>
-                {
-                    { "Url","ws://localhost:8080" },
-                    { "Principal","admin" },
-                    { "Password","password" }
-                }
-            );
+            example.RegisterProvider(localConfiguration);
 
             return new SiloHostBuilder()
                 .UseConfiguration(localConfiguration)
@@ -48,6 +44,8 @@ namespace Orleans.Providers.PushDiffusion.Example
                 .AddApplicationPartsFromReferences(typeof(MeterGrain).Assembly)
                 .Build();
         }
+
+        
 
         private static async Task<IClusterClient> CreateGrainClient()
         {
