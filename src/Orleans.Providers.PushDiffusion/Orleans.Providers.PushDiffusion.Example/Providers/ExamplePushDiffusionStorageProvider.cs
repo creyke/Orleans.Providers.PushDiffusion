@@ -2,7 +2,7 @@
 
 namespace Orleans.Providers.PushDiffusion.Example.Providers
 {
-    public class ExamplePushDiffusionStorageProivder : PushDiffusionBaseStorageProvider<ExamplePushDiffusionMapper>
+    public class ExamplePushDiffusionStorageProvider : PushDiffusionBaseStorageProvider<ExamplePushDiffusionMapper>
     {
     }
 }

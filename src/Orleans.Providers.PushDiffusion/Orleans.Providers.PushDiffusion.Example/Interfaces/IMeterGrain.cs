@@ -2,7 +2,7 @@
 
 namespace Orleans.Providers.PushDiffusion.Example.Interfaces
 {
-    public interface IMeterGrain : IGrainWithGuidKey
+    public interface IMeterGrain : IGrainWithIntegerKey
     {
         Task ClearValue();
         Task<long> GetValue();

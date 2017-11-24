@@ -14,18 +14,20 @@ namespace Orleans.Providers.PushDiffusion.Storage
     public abstract class PushDiffusionBaseStorageProvider<TMapper> : IStorageProvider
         where TMapper : IPushDiffusionMapper
     {
+        private IProviderConfiguration config;
         private TMapper mapper;
         private ISession session;
 
         public string Name { get; private set; }
 
         public Logger Log { get; private set; }
-        
+
         public Task Init(string name, IProviderRuntime providerRuntime, IProviderConfiguration config)
         {
             mapper = Activator.CreateInstance<TMapper>();
             Name = name;
             Log = providerRuntime.GetLogger(name);
+            this.config = config;
             return Task.CompletedTask;
         }
 
@@ -48,7 +50,7 @@ namespace Orleans.Providers.PushDiffusion.Storage
         private Task ReadState(IGrainState grainState, string topicPath)
         {
             // TODO: Implement.
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         public async Task WriteStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
@@ -60,8 +62,8 @@ namespace Orleans.Providers.PushDiffusion.Storage
         private Task WriteState(IGrainState grainState, string topicPath)
         {
             var tcs = new TaskCompletionSource<int>();
-            var value = Diffusion.DataTypes.JSON.FromJSONString(JsonConvert.SerializeObject(grainState));
-            session.TopicUpdateControl.Updater.ValueUpdater<IJSON>().Update(topicPath, value, new ITopicUpdaterUpdateCallbackDefault());
+            var value = Diffusion.DataTypes.JSON.FromJSONString(JsonConvert.SerializeObject(grainState.State));
+            session.TopicUpdateControl.Updater.ValueUpdater<IJSON>().Update(topicPath, value, new PushDiffusionTopicUpdaterUpdateCallback(tcs));
             return tcs.Task;
         }
 
@@ -92,7 +94,10 @@ namespace Orleans.Providers.PushDiffusion.Storage
 
             // TODO: Handle disconnects.
 
-            session = Diffusion.Sessions.Principal("admin").Password("password").Open("ws://localhost:8080");
+            session = Diffusion.Sessions
+                .Principal(config.GetProperty("Principal", "admin"))
+                .Password(config.GetProperty("Password", "password"))
+                .Open(config.GetProperty("Url", "ws://localhost:8080"));
         }
 
         private async Task<string> AddTopicIfRequiredAsync(string grainType, GrainReference grainReference)
